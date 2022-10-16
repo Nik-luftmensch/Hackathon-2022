@@ -1,43 +1,43 @@
 import React, { Component } from 'react';
 import { graphql } from 'react-apollo';
-import {getAuthorsQuery,addBookMutation, getBooksQuery} from '../queries/queries'
+import {getDirectorsQuery,addMovieMutation, getMoviesQuery} from '../queries/queries'
 import {flowRight as compose} from 'lodash';
 
-class AddBook extends Component {
+class AddMovie extends Component {
     constructor(props){
         super(props);
         this.state = {
             name:"",
             genre:"",
-            authorId:""
+            directorId:""
         }
     }
-    displayAuthors(){
-        var data = this.props.getAuthorsQuery;
+    displayDirectors(){
+        var data = this.props.getDirectorsQuery;
         if(data.loading){
-            return( <option disabled>Loading authors</option> );
+            return( <option disabled>Loading directors</option> );
         } else {
-            return data.authors.map(author => {
-                return( <option key={ author.id } value={author.id}>{ author.name }</option> );
+            return data.directors.map(director => {
+                return( <option key={ director.id } value={director.id}>{ director.name }</option> );
             });
         }
     }
     submitForm(e){
         e.preventDefault();
-        this.props.addBookMutation({
+        this.props.addMovieMutation({
             variables:{
                 name: this.state.name,
                 genre: this.state.genre,
-                authorId: this.state.authorId
+                directorId: this.state.directorId
             },
-            refetchQueries:[{query:getBooksQuery}]
+            refetchQueries:[{query:getMoviesQuery}]
         })
     }
     render(){
         return(
-            <form id="add-book" onSubmit={this.submitForm.bind(this)}>
+            <form id="add-movie" onSubmit={this.submitForm.bind(this)}>
                 <div className="field">
-                    <label>Book name:</label>
+                    <label>Movie name:</label>
                     <input type="text" onChange = {(e) => this.setState({name:e.target.value})} />
                 </div>
                 <div className="field">
@@ -45,10 +45,10 @@ class AddBook extends Component {
                     <input type="text" onChange = {(e) => this.setState({genre:e.target.value})} />
                 </div>
                 <div className="field">
-                    <label>Author:</label>
-                    <select onChange = {(e) => this.setState({authorId:e.target.value})}>
-                        <option>Select author</option>
-                        { this.displayAuthors() }
+                    <label>Director:</label>
+                    <select onChange = {(e) => this.setState({directorId:e.target.value})}>
+                        <option>Select director</option>
+                        { this.displayDirectors() }
                     </select>
                 </div>
                 <button>+</button>
@@ -59,6 +59,6 @@ class AddBook extends Component {
 }
 
 export default compose(
-  graphql(getAuthorsQuery,{name:"getAuthorsQuery"}),
-  graphql(addBookMutation,{name:"addBookMutation"})
-)(AddBook);
+  graphql(getDirectorsQuery,{name:"getDirectorsQuery"}),
+  graphql(addMovieMutation,{name:"addMovieMutation"})
+)(AddMovie);

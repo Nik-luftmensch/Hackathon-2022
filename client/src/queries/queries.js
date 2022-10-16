@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost';
 
-const getAuthorsQuery = gql`
+const getDirectorsQuery = gql`
     {
-        authors {
+        directors {
             name
             id
         }
@@ -10,27 +10,27 @@ const getAuthorsQuery = gql`
 `
 
 
-const getBooksQuery = gql`
+const getMoviesQuery = gql`
     {
-        books{
+        movies{
             name
             id
         }
     }
 `
 
-const getBookQuery = gql`
+const getMovieQuery = gql`
     query($id:ID){
-        book(id:$id)
+        movie(id:$id)
         {
             id
             name
             genre
-            author{
+            director{
                 id
                 name
                 age
-                books{
+                movies{
                     name
                     id
                 }
@@ -38,18 +38,18 @@ const getBookQuery = gql`
         }
     }
 `   
-const deletBookMutation = gql`
+const deletMovieMutation = gql`
     mutation($id:ID!){
-        removeBook(id:$id)
+        removeMovie(id:$id)
         {
             name
         }
     }
 ` 
 
-const addBookMutation = gql`
-    mutation($name:String!,$genre:String!,$authorId:ID!){
-        addBook(name:$name,genre:$genre,authorId:$authorId)
+const addMovieMutation = gql`
+    mutation($name:String!,$genre:String!,$directorId:ID!){
+        addMovie(name:$name,genre:$genre,directorId:$directorId)
         {
             name
             id
@@ -57,4 +57,4 @@ const addBookMutation = gql`
     }
 ` 
 
-export {getAuthorsQuery,getBooksQuery,addBookMutation,getBookQuery,deletBookMutation};
+export {getDirectorsQuery,getMoviesQuery,addMovieMutation,getMovieQuery,deletMovieMutation};

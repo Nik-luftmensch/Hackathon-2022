@@ -3,134 +3,178 @@ const graphql = require('graphql');
 const _ = require('lodash');
 const {GraphQLObjectType,GraphQLString,GraphQLSchema,
 GraphQLID,GraphQLInt,GraphQLList,GraphQLNonNull} = graphql;
-const Book = require('../models/book')
-const Author = require('../models/author');
-const book = require('../models/book');
+const Movie = require('../models/movie')
+const Director = require('../models/director')
+const director = require('../models/director')
+const actor = require('../models/actor')
+const Actor = require('../models/actor')
 
-//dummy data
-// const books = [
-//     {name: 'Name of the Wind', genre: 'Fantasy', id: '1', authorId: '1'},
-//     {name: 'The Final Empire', genre: 'Fantasy', id: '2', authorId: '2'},
-//     {name: 'The Long Earth', genre: 'Sci-Fi', id: '3', authorId: '3'},
-//     {name: 'The Hero of Ages', genre: 'Fantasy', id: '4', authorId: '2'},
-//     {name: 'The Colour of Magic', genre: 'Fantasy', id: '5', authorId: '3'},
-//     {name: 'The Light Fantastic', genre: 'Fantasy', id: '6', authorId: '3'}
-//   ]
-// const authors =  [
-//   {name: 'Patrick Rothfuss', age: 44, id:"1"},
-//   {name: 'Brandon Sanderson', age: 42, id:"2"},
-//   {name: 'Terry Pratchett', age: 66, id:"3"},
-// ]  
+// const Reviewers = require('../models/reviewers')
+// const Reviews = require('../models/reviews')
 
-const BookType = new GraphQLObjectType({
-    name : 'Book',
+
+
+const MovieType = new GraphQLObjectType({
+    name : 'Movie',
     fields:()=>({
         id: {type:GraphQLID},
         name:{type:GraphQLString},
         genre:{type:GraphQLString},
-        author:{
-            type:AuthorType,
+        director:{
+            type:DirectorType,
             resolve(parent,args){
-                // return _.find(authors,{id:parent.authorId});
-                return Author.findById(parent.authorId);
+                return Director.findById(parent.directorId);
             }
         }
+        // actor:{
+        //     type:ActorType,
+        //     resolve(parent,args){
+        //         return Actor.findById(parent.actorId);
+        //     }
+        // }
+        // reviews:{
+        //     type:ReviewType,
+        //     resolve(parent,args){
+        //         return Reviews.findById(parent.reviewId);
+        //     }
+        // }
     })
 })  
 
-const AuthorType = new GraphQLObjectType({
-    name : 'Author',
+
+
+const DirectorType = new GraphQLObjectType({
+    name : 'Director',
     fields:()=>({
         id: {type:GraphQLID},
         name:{type:GraphQLString},
         age:{type:GraphQLInt},
-        books:{
-            type: new GraphQLList(BookType),
+        movies:{
+            type: new GraphQLList(MovieType),
             resolve(parent,args){
-                // return _.filter(books,{authorId:parent.id})
-                return Book.find({authorId: parent.id});
+                return Movie.find({directorId: parent.id});
             }
         }
     })
 })
 
+
+const ActorType = new GraphQLObjectType({
+    name : 'Actor',
+    fields:()=>({
+        id: {type:GraphQLID},
+        name:{type:GraphQLString},
+        movies:{
+            type: new GraphQLList(MovieType),
+            resolve(parent,args){
+                return Movie.find({actorId: parent.id});
+            }
+        }
+    })
+})
+
+
+
 const RootQuery = new GraphQLObjectType({
     name:'RootQueryType',
     fields:{
-        book:{
-            type:BookType,
+        movie:{
+            type:MovieType,
             args:{id:{type:GraphQLID}},
             resolve(parent,args){
-                //code to get data from db/ other source
-               //return _.find(books,{id: args.id})
-               return Book.findById(args.id);
+               return Movie.findById(args.id);
             }
         },
-        author:{
-            type:AuthorType,
+        director:{
+            type:DirectorType,
             args:{id:{type:GraphQLID}},
             resolve(parent,args){
-                // return _.find(authors,{id: args.id})
-                return Author.findById(args.id);
+                return Director.findById(args.id);
             }
         },
-        books:{
-            type: new GraphQLList(BookType),
+        actor:{
+            type:ActorType,
+            args:{id:{type:GraphQLID}},
             resolve(parent,args){
-                // return books
-                return Book.find({});
+                return Actor.findById(args.id);
             }
         },
-        authors:{
-            type: new GraphQLList(AuthorType),
+        movies:{
+            type: new GraphQLList(MovieType),
             resolve(parent,args){
-                // return authors
-                return Author.find({});
+                return Movie.find({});
             }
-        }
+        },
+        directors:{
+            type: new GraphQLList(DirectorType),
+            resolve(parent,args){
+                return Director.find({});
+            }
+        },
+        actors:{
+            type: new GraphQLList(DirectorType),
+            resolve(parent,args){
+                return Actor.find({});
+            }
+        },
+
     }
 })
 
 const Mutation = new GraphQLObjectType({
     name:'Mutation',
     fields:{
-        addAuthor:{
-            type:AuthorType,
+        addDirector:{
+            type:DirectorType,
             args:{
                 name:{type:new GraphQLNonNull(GraphQLString)},
                 age:{type:new GraphQLNonNull(GraphQLInt)}
             },
             resolve(parent,args){
-                let author = new Author({
+                let director = new Director({
                     name: args.name,
                     age: args.age
                 });
-                return author.save();
+                return director.save();
             }
         },
-        addBook:{
-            type:BookType,
+        addActors:{
+            type:ActorType,
+            args:{
+                name:{type:new GraphQLNonNull(GraphQLString)},
+            },
+            resolve(parent,args){
+                let actor = new Actor({
+                    name: args.name,
+                });
+                return actor.save();
+            }
+        },
+        addMovie:{
+            type:MovieType,
             args:{
                 name:{type:new GraphQLNonNull(GraphQLString)},
                 genre:{type:new GraphQLNonNull(GraphQLString)},
-                authorId:{type:new GraphQLNonNull(GraphQLID)}
+                directorId:{type:new GraphQLNonNull(GraphQLID)},
+                // actorId:{type:new GraphQLNonNull(GraphQLID)},
             },
             resolve(parent,args){
-                let book = new Book({
+                let movie = new Movie({
                     name: args.name,
                     genre: args.genre,
-                    authorId: args.authorId
+                    directorId: args.directorId,
+                    // actorId: args.actorId
                 });
-              return  book.save();
+              return  movie.save();
             }
         },
-        removeBook:{
-            type:BookType,
+        removeMovie:{
+            type:MovieType,
             args:{
                 Id:{type:GraphQLID}
             },
             resolve(parent,args){
-                return book.findByIdAndDelete(args.Id)
+                return movie.findByIdAndDelete(args.Id)
             }
         }
     }
